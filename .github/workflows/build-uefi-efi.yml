@@ -58,17 +58,17 @@ jobs:
           g++-multilib \
           libc6-dev-i386
 
+    - name: Checkout EDK2
+      uses: actions/checkout@v4
+      with:
+        repository: tianocore/edk2
+        ref: ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }}
+        path: edk2
+
     - name: Setup EDK2
       run: |
-        # Clone EDK2
-        git clone --recursive --depth 1 --branch ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }} \
-          https://github.com/tianocore/edk2.git
-        cd edk2
-        
-        # Initialize submodules
-        git submodule update --init --recursive
-        
         # Set up build environment
+        cd edk2
         export WORKSPACE=$(pwd)
         export PACKAGES_PATH=$WORKSPACE
         export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
