@@ -54,7 +54,6 @@ jobs:
           git \
           nasm \
           python3 \
-          python3-distutils \
           gcc-multilib \
           g++-multilib \
           libc6-dev-i386
