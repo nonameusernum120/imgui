@@ -55,7 +55,7 @@
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
 
 [Components]
-  examples/example_uefi/ImGuiUefiExample.inf
+  ImGui/examples/example_uefi/ImGuiUefiExample.inf
 
 [BuildOptions]
   # Global build options
