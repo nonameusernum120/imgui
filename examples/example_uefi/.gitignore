@@ -1,0 +1,32 @@
+# Build artifacts
+*.o
+*.obj
+*.efi
+*.lib
+*.dll
+*.exe
+
+# EDK2 build directories
+Build/
+Conf/
+
+# Fake headers for compilation testing
+fake_edk2/
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+.vscode/
+.vs/
+
+# Log files
+*.log

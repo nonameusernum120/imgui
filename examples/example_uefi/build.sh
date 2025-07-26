@@ -32,14 +32,27 @@ ARCH=${1:-X64}
 TARGET=${2:-DEBUG}
 TOOLCHAIN=${3:-GCC5}
 
+echo "Usage: $0 [ARCH] [TARGET] [TOOLCHAIN] [minimal]"
+echo "  ARCH: IA32, X64, ARM, AARCH64 (default: X64)"
+echo "  TARGET: DEBUG, RELEASE (default: DEBUG)"
+echo "  TOOLCHAIN: GCC5, CLANG, VS2019, etc. (default: GCC5)"
+echo "  minimal: Use minimal DSC for older EDK2 (optional)"
+echo ""
 echo "Building with:"
 echo "  Architecture: $ARCH"
 echo "  Target: $TARGET"
 echo "  Toolchain: $TOOLCHAIN"
 echo ""
 
+# Determine which DSC file to use
+DSC_FILE="ImGui/examples/example_uefi/ImGuiUefiExample.dsc"
+if [ "$4" = "minimal" ]; then
+    DSC_FILE="ImGui/examples/example_uefi/ImGuiUefiExample_Minimal.dsc"
+    echo "Using minimal DSC file for older EDK2 compatibility"
+fi
+
 # Build command
-BUILD_CMD="build -p ImGui/examples/example_uefi/ImGuiUefiExample.dsc -a $ARCH -t $TOOLCHAIN -b $TARGET"
+BUILD_CMD="build -p $DSC_FILE -a $ARCH -t $TOOLCHAIN -b $TARGET"
 
 echo "Executing: $BUILD_CMD"
 echo ""
@@ -59,6 +72,9 @@ if $BUILD_CMD; then
     echo ""
 else
     echo ""
-    echo "Build failed!"
+    echo "Build failed! If you get library errors, try:"
+    echo "  $0 $ARCH $TARGET $TOOLCHAIN minimal"
+    echo ""
+    echo "This will use the minimal DSC file compatible with older EDK2 versions."
     exit 1
 fi
