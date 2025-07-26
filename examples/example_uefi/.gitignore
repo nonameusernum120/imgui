@@ -30,3 +30,12 @@ Thumbs.db
 
 # Log files
 *.log
+
+# Testing artifacts
+test-disk.img
+*.img
+mnt/
+bootable-image/
+*.zip
+*.tar.gz
+release-package/

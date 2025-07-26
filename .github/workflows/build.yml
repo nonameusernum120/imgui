@@ -615,7 +615,16 @@ jobs:
       run: |
         cd examples/example_uefi
         bash -n build.sh
+        bash -n test-with-qemu.sh
+        bash -n demo-artifacts.sh
         echo "✅ Build script syntax check passed"
+
+    - name: Note about full EFI build
+      run: |
+        echo "ℹ️  This is a compilation test only."
+        echo "For full EFI builds with real EDK2, see:"
+        echo "  - '.github/workflows/build-uefi-efi.yml' workflow"
+        echo "  - Manual trigger: Actions → Build UEFI EFI Image"
 
   Android:
     runs-on: ubuntu-latest

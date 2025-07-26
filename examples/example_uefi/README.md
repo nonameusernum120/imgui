@@ -72,7 +72,63 @@ The UEFI backend (`imgui_impl_uefi.h/cpp`) provides a platform and renderer impl
 
 ## Testing
 
-### Using QEMU
+### Automated Build with GitHub Actions
+
+The project includes a comprehensive GitHub Actions workflow (`.github/workflows/build-uefi-efi.yml`) that:
+
+- **Builds real EFI binaries** using EDK2 for multiple architectures (X64, IA32)
+- **Creates bootable images** ready for USB drives or testing
+- **Generates artifacts** including:
+  - Raw `.efi` files for development
+  - Bootable ZIP packages for end users
+  - Complete release packages with source code (on tags)
+
+To trigger a build:
+1. Push changes to UEFI-related files
+2. Create a pull request affecting the UEFI example
+3. Manually trigger via "Actions" tab → "Build UEFI EFI Image" → "Run workflow"
+
+### Using Pre-built Artifacts
+
+You can download and use pre-built artifacts without building locally:
+
+```bash
+# Download and test pre-built artifacts
+./demo-artifacts.sh download
+./demo-artifacts.sh test artifacts-20240101-120000
+
+# Or list available builds first
+./demo-artifacts.sh list
+```
+
+The demo script automatically:
+- Downloads the latest successful build artifacts
+- Extracts bootable images
+- Tests them with QEMU
+- Provides easy cleanup
+
+### Using QEMU (Automated)
+
+Use the provided script for easy testing:
+
+```bash
+# Test a built EFI file
+./test-with-qemu.sh Build/ImGuiUefiExample/RELEASE_GCC5/X64/ImGuiUefiExample.efi
+
+# Test a downloaded artifact
+./test-with-qemu.sh bootable-image/EFI/BOOT/bootx64.efi x86_64
+
+# Test IA32 build
+./test-with-qemu.sh ImGuiUefiExample.efi i386
+```
+
+The script automatically:
+- Creates a bootable disk image
+- Sets up the EFI boot structure
+- Finds and configures OVMF firmware
+- Launches QEMU with proper settings
+
+### Using QEMU (Manual)
 
 1. **Create a test image:**
    ```bash

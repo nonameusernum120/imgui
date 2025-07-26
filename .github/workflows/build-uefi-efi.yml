@@ -1,0 +1,335 @@
+name: Build UEFI EFI Image
+
+on:
+  push:
+    paths:
+      - 'backends/imgui_impl_uefi.*'
+      - 'examples/example_uefi/**'
+      - '.github/workflows/build-uefi-efi.yml'
+  pull_request:
+    paths:
+      - 'backends/imgui_impl_uefi.*'
+      - 'examples/example_uefi/**'
+      - '.github/workflows/build-uefi-efi.yml'
+  workflow_dispatch:
+    inputs:
+      edk2_version:
+        description: 'EDK2 version/tag to use'
+        required: false
+        default: 'edk2-stable202408'
+      architecture:
+        description: 'Target architecture'
+        required: false
+        default: 'X64'
+        type: choice
+        options:
+          - X64
+          - IA32
+          - AARCH64
+
+jobs:
+  build-uefi-efi:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - arch: X64
+            toolchain: GCC5
+          - arch: IA32
+            toolchain: GCC5
+    
+    steps:
+    - name: Checkout Dear ImGui
+      uses: actions/checkout@v4
+      with:
+        path: imgui
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          uuid-dev \
+          iasl \
+          git \
+          nasm \
+          python3 \
+          python3-distutils \
+          gcc-multilib \
+          g++-multilib \
+          libc6-dev-i386
+
+    - name: Setup EDK2
+      run: |
+        # Clone EDK2
+        git clone --recursive --depth 1 --branch ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }} \
+          https://github.com/tianocore/edk2.git
+        cd edk2
+        
+        # Initialize submodules
+        git submodule update --init --recursive
+        
+        # Set up build environment
+        export WORKSPACE=$(pwd)
+        export PACKAGES_PATH=$WORKSPACE
+        export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
+        
+        # Build BaseTools
+        make -C BaseTools
+        
+        # Set environment variables for subsequent steps
+        echo "WORKSPACE=$(pwd)" >> $GITHUB_ENV
+        echo "PACKAGES_PATH=$(pwd)" >> $GITHUB_ENV
+        echo "EDK_TOOLS_PATH=$(pwd)/BaseTools" >> $GITHUB_ENV
+
+    - name: Copy Dear ImGui to EDK2 workspace
+      run: |
+        # Copy Dear ImGui source to EDK2 workspace
+        cp -r imgui $WORKSPACE/ImGui
+        
+        # Verify the copy
+        ls -la $WORKSPACE/ImGui/
+        ls -la $WORKSPACE/ImGui/examples/example_uefi/
+
+    - name: Configure Build Environment
+      run: |
+        cd $WORKSPACE
+        
+        # Source the EDK2 setup script
+        . edksetup.sh
+        
+        # Set up target configuration
+        export ARCH=${{ matrix.arch }}
+        export TOOLCHAIN=${{ matrix.toolchain }}
+        export TARGET=RELEASE
+        
+        echo "Build configuration:"
+        echo "  Workspace: $WORKSPACE"
+        echo "  Architecture: $ARCH"
+        echo "  Toolchain: $TOOLCHAIN"
+        echo "  Target: $TARGET"
+
+    - name: Build UEFI Application
+      run: |
+        cd $WORKSPACE
+        
+        # Source EDK2 environment
+        . edksetup.sh
+        
+        # Try building with the main DSC first
+        echo "Attempting build with main DSC file..."
+        if build -p ImGui/examples/example_uefi/ImGuiUefiExample.dsc \
+                 -a ${{ matrix.arch }} \
+                 -t ${{ matrix.toolchain }} \
+                 -b RELEASE; then
+          echo "✅ Build successful with main DSC!"
+          BUILD_SUCCESS=true
+          DSC_USED="main"
+        else
+          echo "❌ Main DSC build failed, trying minimal DSC..."
+          if build -p ImGui/examples/example_uefi/ImGuiUefiExample_Minimal.dsc \
+                   -a ${{ matrix.arch }} \
+                   -t ${{ matrix.toolchain }} \
+                   -b RELEASE; then
+            echo "✅ Build successful with minimal DSC!"
+            BUILD_SUCCESS=true
+            DSC_USED="minimal"
+          else
+            echo "❌ Both DSC files failed to build"
+            BUILD_SUCCESS=false
+          fi
+        fi
+        
+        # Set environment variables for later steps
+        echo "BUILD_SUCCESS=$BUILD_SUCCESS" >> $GITHUB_ENV
+        echo "DSC_USED=$DSC_USED" >> $GITHUB_ENV
+        
+        if [ "$BUILD_SUCCESS" = "false" ]; then
+          echo "Build failed!"
+          exit 1
+        fi
+
+    - name: Verify Build Output
+      run: |
+        cd $WORKSPACE
+        
+        # Find the build output
+        BUILD_DIR="Build/ImGuiUefiExample/RELEASE_${{ matrix.toolchain }}/${{ matrix.arch }}"
+        EFI_FILE="$BUILD_DIR/ImGuiUefiExample.efi"
+        
+        echo "Looking for EFI file at: $EFI_FILE"
+        
+        if [ -f "$EFI_FILE" ]; then
+          echo "✅ EFI file found!"
+          file "$EFI_FILE"
+          ls -lh "$EFI_FILE"
+          
+          # Set path for artifact upload
+          echo "EFI_FILE_PATH=$EFI_FILE" >> $GITHUB_ENV
+        else
+          echo "❌ EFI file not found!"
+          echo "Build directory contents:"
+          find Build/ -name "*.efi" -o -name "*.inf" -o -name "*.dsc" | head -20
+          exit 1
+        fi
+
+    - name: Create Bootable Image Structure
+      run: |
+        cd $WORKSPACE
+        
+        # Create bootable USB structure
+        mkdir -p bootable-image/EFI/BOOT
+        
+        # Copy the EFI file with the correct name for booting
+        if [ "${{ matrix.arch }}" = "X64" ]; then
+          cp "$EFI_FILE_PATH" bootable-image/EFI/BOOT/bootx64.efi
+          BOOT_FILE="bootx64.efi"
+        elif [ "${{ matrix.arch }}" = "IA32" ]; then
+          cp "$EFI_FILE_PATH" bootable-image/EFI/BOOT/bootia32.efi
+          BOOT_FILE="bootia32.efi"
+        elif [ "${{ matrix.arch }}" = "AARCH64" ]; then
+          cp "$EFI_FILE_PATH" bootable-image/EFI/BOOT/bootaa64.efi
+          BOOT_FILE="bootaa64.efi"
+        fi
+        
+        # Create a README for users
+        cat > bootable-image/README.txt << EOF
+        Dear ImGui UEFI Example - Bootable Image
+        ========================================
+        
+        This directory contains a bootable UEFI application that demonstrates
+        Dear ImGui running in a UEFI environment.
+        
+        Contents:
+        - EFI/BOOT/boot*.efi: The Dear ImGui UEFI application
+        
+        To use:
+        1. Copy the entire contents of this directory to a FAT32-formatted USB drive
+        2. Boot from the USB drive on a UEFI system
+        3. The Dear ImGui application should start automatically
+        
+        Controls:
+        - ESC: Exit the application
+        - Mouse/Keyboard: Navigate the Dear ImGui interface
+        
+        Built with:
+        - Dear ImGui (latest)
+        - EDK2 (edk2-stable202408)
+        - Architecture: ${{ matrix.arch }}
+        - DSC used: ${{ env.DSC_USED }}
+        
+        For more information, visit:
+        https://github.com/ocornut/imgui/tree/master/examples/example_uefi
+        EOF
+        
+        # Show the structure
+        echo "Bootable image structure:"
+        find bootable-image -type f | sort
+        
+        # Create a zip archive
+        cd bootable-image
+        zip -r ../ImGuiUefiExample-${{ matrix.arch }}-bootable.zip .
+        cd ..
+        
+        echo "BOOTABLE_ZIP=ImGuiUefiExample-${{ matrix.arch }}-bootable.zip" >> $GITHUB_ENV
+
+    - name: Upload EFI Application Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ImGuiUefiExample-${{ matrix.arch }}-efi
+        path: ${{ env.EFI_FILE_PATH }}
+        if-no-files-found: error
+
+    - name: Upload Bootable Image Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ImGuiUefiExample-${{ matrix.arch }}-bootable
+        path: ${{ env.WORKSPACE }}/${{ env.BOOTABLE_ZIP }}
+        if-no-files-found: error
+
+    - name: Create Release Assets (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        cd $WORKSPACE
+        
+        # Create a comprehensive release package
+        mkdir -p release-package
+        
+        # Copy the EFI file
+        cp "$EFI_FILE_PATH" release-package/
+        
+        # Copy the bootable image
+        cp "$BOOTABLE_ZIP" release-package/
+        
+        # Copy source files
+        cp -r ImGui/examples/example_uefi release-package/source
+        cp -r ImGui/backends/imgui_impl_uefi.* release-package/source/
+        
+        # Create build info
+        cat > release-package/BUILD_INFO.txt << EOF
+        Dear ImGui UEFI Example - Release Build
+        ======================================
+        
+        Build Information:
+        - Date: $(date -u)
+        - EDK2 Version: ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }}
+        - Architecture: ${{ matrix.arch }}
+        - Toolchain: ${{ matrix.toolchain }}
+        - DSC Used: ${{ env.DSC_USED }}
+        - Git Commit: ${{ github.sha }}
+        
+        Files Included:
+        - ImGuiUefiExample.efi: The compiled UEFI application
+        - ImGuiUefiExample-*-bootable.zip: Ready-to-use bootable image
+        - source/: Complete source code and build files
+        
+        Testing:
+        This build has been automatically tested for compilation and basic
+        structure validation. For full testing, boot the application on
+        real UEFI hardware or in a UEFI-compatible virtual machine.
+        
+        EOF
+        
+        # Create release archive
+        tar -czf ImGuiUefiExample-${{ matrix.arch }}-release.tar.gz release-package
+        
+        echo "Release package created: ImGuiUefiExample-${{ matrix.arch }}-release.tar.gz"
+
+    - name: Upload Release Package
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: actions/upload-artifact@v4
+      with:
+        name: ImGuiUefiExample-${{ matrix.arch }}-release
+        path: ${{ env.WORKSPACE }}/ImGuiUefiExample-${{ matrix.arch }}-release.tar.gz
+        if-no-files-found: error
+
+  summary:
+    needs: build-uefi-efi
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+    - name: Build Summary
+      run: |
+        echo "## Dear ImGui UEFI Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Artifacts Generated" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "The following artifacts have been generated:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **EFI Applications**: Raw .efi files for each architecture" >> $GITHUB_STEP_SUMMARY
+        echo "- **Bootable Images**: Ready-to-use ZIP files for USB drives" >> $GITHUB_STEP_SUMMARY
+        echo "- **Release Packages**: Complete packages with source and documentation (on tags)" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Usage Instructions" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "1. Download the bootable image artifact" >> $GITHUB_STEP_SUMMARY
+        echo "2. Extract to a FAT32-formatted USB drive" >> $GITHUB_STEP_SUMMARY
+        echo "3. Boot from the USB drive on a UEFI system" >> $GITHUB_STEP_SUMMARY
+        echo "4. The Dear ImGui UEFI application will start automatically" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Testing" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "You can test the EFI application using:" >> $GITHUB_STEP_SUMMARY
+        echo "- QEMU with OVMF UEFI firmware" >> $GITHUB_STEP_SUMMARY
+        echo "- VirtualBox with EFI enabled" >> $GITHUB_STEP_SUMMARY
+        echo "- Real UEFI hardware" >> $GITHUB_STEP_SUMMARY
