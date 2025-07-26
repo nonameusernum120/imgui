@@ -23,6 +23,11 @@
 #include <Protocol/SimpleTextIn.h>
 #include <Protocol/SimplePointer.h>
 
+// For compilation testing, include stdint for intptr_t
+#ifndef EFIAPI
+#include <stdint.h>
+#endif
+
 // Texture storage structure
 struct UefiTexture {
     UINT32* Pixels;
@@ -108,15 +113,15 @@ static void FillTriangle(UINT32* buffer, UINT32 width, UINT32 height,
                         const ImVec2& p0, const ImVec2& p1, const ImVec2& p2, 
                         UINT32 col0, UINT32 col1, UINT32 col2)
 {
-    INT32 minX = (INT32)ImMin(ImMin(p0.x, p1.x), p2.x);
-    INT32 maxX = (INT32)ImMax(ImMax(p0.x, p1.x), p2.x);
-    INT32 minY = (INT32)ImMin(ImMin(p0.y, p1.y), p2.y);
-    INT32 maxY = (INT32)ImMax(ImMax(p0.y, p1.y), p2.y);
+    INT32 minX = (INT32)(p0.x < p1.x ? (p0.x < p2.x ? p0.x : p2.x) : (p1.x < p2.x ? p1.x : p2.x));
+    INT32 maxX = (INT32)(p0.x > p1.x ? (p0.x > p2.x ? p0.x : p2.x) : (p1.x > p2.x ? p1.x : p2.x));
+    INT32 minY = (INT32)(p0.y < p1.y ? (p0.y < p2.y ? p0.y : p2.y) : (p1.y < p2.y ? p1.y : p2.y));
+    INT32 maxY = (INT32)(p0.y > p1.y ? (p0.y > p2.y ? p0.y : p2.y) : (p1.y > p2.y ? p1.y : p2.y));
     
-    minX = ImMax(minX, 0);
-    maxX = ImMin(maxX, (INT32)width - 1);
-    minY = ImMax(minY, 0);
-    maxY = ImMin(maxY, (INT32)height - 1);
+    minX = minX > 0 ? minX : 0;
+    maxX = maxX < (INT32)width - 1 ? maxX : (INT32)width - 1;
+    minY = minY > 0 ? minY : 0;
+    maxY = maxY < (INT32)height - 1 ? maxY : (INT32)height - 1;
     
     for (INT32 y = minY; y <= maxY; y++) {
         for (INT32 x = minX; x <= maxX; x++) {
@@ -255,7 +260,7 @@ bool ImGui_ImplUefi_CreateDeviceObjects()
     
     // Create font texture
     bd->FontTextureId = ImGui_ImplUefi_CreateTexture(pixels, width, height);
-    io.Fonts->SetTexID((ImTextureID)(intptr_t)bd->FontTextureId);
+    io.Fonts->SetTexID((ImTextureID)(uintptr_t)bd->FontTextureId);
     
     return true;
 }
@@ -306,8 +311,8 @@ void ImGui_ImplUefi_ProcessInputEvents()
             bd->MouseY += state.RelativeMovementY / 1000;
             
             // Clamp to screen bounds
-            bd->MouseX = ImClamp(bd->MouseX, 0, (INT32)bd->ScreenWidth - 1);
-            bd->MouseY = ImClamp(bd->MouseY, 0, (INT32)bd->ScreenHeight - 1);
+            bd->MouseX = bd->MouseX < 0 ? 0 : (bd->MouseX >= (INT32)bd->ScreenWidth ? (INT32)bd->ScreenWidth - 1 : bd->MouseX);
+            bd->MouseY = bd->MouseY < 0 ? 0 : (bd->MouseY >= (INT32)bd->ScreenHeight ? (INT32)bd->ScreenHeight - 1 : bd->MouseY);
             
             io.AddMousePosEvent((float)bd->MouseX, (float)bd->MouseY);
             
@@ -367,7 +372,7 @@ void ImGui_ImplUefi_DeleteTexture(UINT32 texture_id)
     if (texture_id < MAX_TEXTURES && bd->TextureUsed[texture_id]) {
         if (bd->Textures[texture_id].Pixels) {
             FreePool(bd->Textures[texture_id].Pixels);
-            bd->Textures[texture_id].Pixels = NULL;
+            bd->Textures[texture_id].Pixels = 0;
         }
         bd->TextureUsed[texture_id] = FALSE;
     }
@@ -426,7 +431,7 @@ void ImGui_ImplUefi_RenderDrawData(ImDrawData* draw_data)
                         continue;
                     
                     // For text rendering, check if this uses the font texture
-                    if ((UINT32)(intptr_t)pcmd->GetTexID() == bd->FontTextureId) {
+                    if ((UINT32)(uintptr_t)pcmd->GetTexID() == bd->FontTextureId) {
                         // Render as colored triangle (simplified text rendering)
                         FillTriangle(bd->FrameBuffer, bd->ScreenWidth, bd->ScreenHeight, p0, p1, p2, v0.col, v1.col, v2.col);
                     } else {

@@ -472,6 +472,9 @@ jobs:
     - name: Build with IMGUI_IMPL_VULKAN_NO_PROTOTYPES
       run: g++ -c -I. -std=c++11 -DIMGUI_IMPL_VULKAN_NO_PROTOTYPES=1 backends/imgui_impl_vulkan.cpp
 
+    - name: Build example_uefi (compilation test)
+      run: make -C examples/example_uefi
+
   MacOS:
     runs-on: macos-latest
     steps:
@@ -546,6 +549,9 @@ jobs:
     - name: Build example_apple_opengl2
       run: xcodebuild -project examples/example_apple_opengl2/example_apple_opengl2.xcodeproj -target example_osx_opengl2
 
+    - name: Build example_uefi (compilation test)
+      run: make -C examples/example_uefi
+
   iOS:
     runs-on: macos-latest
     steps:
@@ -596,6 +602,20 @@ jobs:
         emcc -v
         emcmake cmake -B build -DCMAKE_BUILD_TYPE=Release examples/example_glfw_wgpu
         cmake --build build
+
+  UEFI:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build example_uefi (compilation test)
+      run: make -C examples/example_uefi
+
+    - name: Verify build script syntax
+      run: |
+        cd examples/example_uefi
+        bash -n build.sh
+        echo "✅ Build script syntax check passed"
 
   Android:
     runs-on: ubuntu-latest
