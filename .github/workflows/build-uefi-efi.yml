@@ -84,12 +84,13 @@ jobs:
 
     - name: Copy Dear ImGui to EDK2 workspace
       run: |
-        # Copy Dear ImGui source to EDK2 workspace
-        cp -r imgui $WORKSPACE/ImGui
-        
+        # Copy Dear ImGui 'examples' directory to EDK2 workspace root
+        cp -r imgui/examples $WORKSPACE/
+        # Optionally copy other required directories/files as needed
+        # cp -r imgui/backends $WORKSPACE/
+        # cp imgui/imgui* $WORKSPACE/
         # Verify the copy
-        ls -la $WORKSPACE/ImGui/
-        ls -la $WORKSPACE/ImGui/examples/example_uefi/
+        ls -la $WORKSPACE/examples/example_uefi/
 
     - name: Configure Build Environment
       run: |
