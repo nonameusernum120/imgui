@@ -16,7 +16,7 @@ on:
       edk2_version:
         description: 'EDK2 version/tag to use'
         required: false
-        default: 'edk2-stable202408'
+        default: 'edk2-stable202505'
       architecture:
         description: 'Target architecture'
         required: false
