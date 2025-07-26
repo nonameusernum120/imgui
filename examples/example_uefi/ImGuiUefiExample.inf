@@ -1,0 +1,50 @@
+## @file
+#  Dear ImGui UEFI Example Application
+#
+#  This application demonstrates the use of Dear ImGui in a UEFI environment
+#  using the Graphics Output Protocol (GOP) for rendering.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = ImGuiUefiExample
+  FILE_GUID                      = 12345678-1234-1234-1234-123456789ABC
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+[Sources]
+  main.c
+  imgui_c_wrapper.cpp
+  ../../imgui.cpp
+  ../../imgui_demo.cpp
+  ../../imgui_draw.cpp
+  ../../imgui_tables.cpp
+  ../../imgui_widgets.cpp
+  ../../backends/imgui_impl_uefi.cpp
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiApplicationEntryPoint
+  UefiLib
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  DebugLib
+  TimerLib
+  PerformanceLib
+
+[Protocols]
+  gEfiGraphicsOutputProtocolGuid         ## CONSUMES
+  gEfiSimpleTextInProtocolGuid           ## CONSUMES
+  gEfiSimplePointerProtocolGuid          ## CONSUMES
+
+[BuildOptions]
+  # Enable C++ compilation
+  MSFT:*_*_*_CC_FLAGS = /TP /std:c++17
+  GCC:*_*_*_CC_FLAGS = -x c++ -std=c++17 -fno-rtti -fno-exceptions
+  CLANG:*_*_*_CC_FLAGS = -x c++ -std=c++17 -fno-rtti -fno-exceptions
