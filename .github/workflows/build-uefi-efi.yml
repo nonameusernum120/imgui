@@ -64,6 +64,7 @@ jobs:
         repository: tianocore/edk2
         ref: ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }}
         path: edk2
+        submodules: recursive
 
     - name: Setup EDK2
       run: |
