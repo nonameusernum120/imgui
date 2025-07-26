@@ -44,6 +44,7 @@
   
   # IO Libraries
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  StackCheckLib|MdePkg/Library/BaseStackCheckLibNull/BaseStackCheckLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications

@@ -47,6 +47,7 @@
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  StackCheckLib|MdePkg/Library/BaseStackCheckLibNull/BaseStackCheckLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications
