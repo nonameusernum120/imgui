@@ -1,5 +1,6 @@
 ## @file
-#  Platform Description file for Dear ImGui UEFI Example
+#  Minimal Platform Description file for Dear ImGui UEFI Example
+#  This version is compatible with older EDK2 releases
 #
 ##
 
@@ -9,7 +10,7 @@
   PLATFORM_VERSION               = 1.0
   DSC_SPECIFICATION               = 0x00010005
   OUTPUT_DIRECTORY                = Build/ImGuiUefiExample
-  SUPPORTED_ARCHITECTURES         = IA32|IPF|X64|EBC|ARM|AARCH64
+  SUPPORTED_ARCHITECTURES         = IA32|X64|EBC|ARM|AARCH64
   BUILD_TARGETS                   = DEBUG|RELEASE
   SKUID_IDENTIFIER                = DEFAULT
 
@@ -17,7 +18,7 @@
   # Entry point
   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
   
-  # Basic
+  # Basic libraries
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   BaseMemoryLib|MdePkg/Library/BaseMemoryLibRepStr/BaseMemoryLibRepStr.inf
   MemoryAllocationLib|MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf
@@ -29,9 +30,10 @@
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   DevicePathLib|MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf
   
-  # Debug
-  DebugLib|MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf
+  # Debug (use SerialPort for older EDK2)
+  DebugLib|MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
+  SerialPortLib|MdePkg/Library/BaseSerialPortLibNull/BaseSerialPortLibNull.inf
   
   # Performance and Timer
   PerformanceLib|MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf
@@ -40,19 +42,13 @@
   # PCD
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   
-  # Additional required libraries (may vary by EDK2 version)
-  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
-  
-  # Additional libraries that might be required
+  # IO Libraries
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
-  PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
-  PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications
-  FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
-  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
+  HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
 
 [Components]
   examples/example_uefi/ImGuiUefiExample.inf

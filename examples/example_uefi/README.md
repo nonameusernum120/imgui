@@ -205,12 +205,20 @@ To integrate the UEFI backend into your own UEFI application:
    - Check that all required EDK2 packages are available
    - Verify toolchain compatibility
 
-2. **Runtime Issues:**
+2. **Missing Library Errors (e.g., RegisterFilterLib):**
+   - Use `ImGuiUefiExample_Minimal.dsc` for older EDK2 versions
+   - Some libraries like RegisterFilterLib were added in newer EDK2 releases
+   - If you get library class not found errors, try the minimal DSC file:
+     ```bash
+     build -p ImGui/examples/example_uefi/ImGuiUefiExample_Minimal.dsc -a X64 -t GCC5 -b DEBUG
+     ```
+
+3. **Runtime Issues:**
    - Verify Graphics Output Protocol is available
    - Check screen resolution compatibility
    - Ensure sufficient memory for frame buffer
 
-3. **Input Problems:**
+4. **Input Problems:**
    - Text input may not work if Simple Text Input Protocol is unavailable
    - Mouse input requires Simple Pointer Protocol support
 
