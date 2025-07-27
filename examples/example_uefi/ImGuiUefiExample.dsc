@@ -41,19 +41,25 @@
   # PCD
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   
-  # Additional required libraries (may vary by EDK2 version)
-  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
-  
   # Additional libraries that might be required
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  
+  # Stack and Register Filter libraries (custom implementations)
+  StackCheckLib|examples/example_uefi/StackCheckLib.inf
+  RegisterFilterLib|examples/example_uefi/RegisterFilterLib.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications
   FileHandleLib|MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf
   HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ImGuiPkg/ImGuiPkg.dec
 
 [Components]
   ImGui/examples/example_uefi/ImGuiUefiExample.inf

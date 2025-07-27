@@ -44,11 +44,20 @@
   
   # IO Libraries
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  
+  # Stack and Register Filter libraries (custom implementations)
+  StackCheckLib|examples/example_uefi/StackCheckLib.inf
+  RegisterFilterLib|examples/example_uefi/RegisterFilterLib.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ImGuiPkg/ImGuiPkg.dec
 
 [Components]
   examples/example_uefi/ImGuiUefiExample.inf

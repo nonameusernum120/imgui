@@ -58,19 +58,20 @@ jobs:
           g++-multilib \
           libc6-dev-i386
 
-    - name: Setup EDK2
+    - name: Checkout EDK2
+      uses: actions/checkout@v4
+      with:
+        repository: tianocore/edk2
+        ref: ${{ github.event.inputs.edk2_version || 'edk2-stable202505' }}
+        path: edk2
+        submodules: recursive
+
+    - name: Setup EDK2 Environment
       run: |
-        # Clone EDK2
-        git clone --recursive --depth 1 --branch ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }} \
-          https://github.com/tianocore/edk2.git
-        cd edk2
-        
-        # Initialize submodules
-        git submodule update --init --recursive
-        
         # Set up build environment
+        cd edk2
         export WORKSPACE=$(pwd)
-        export PACKAGES_PATH=$WORKSPACE
+        export PACKAGES_PATH=$WORKSPACE/ImGuiPkg:$WORKSPACE
         export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
         
         # Build BaseTools
@@ -78,17 +79,40 @@ jobs:
         
         # Set environment variables for subsequent steps
         echo "WORKSPACE=$(pwd)" >> $GITHUB_ENV
-        echo "PACKAGES_PATH=$(pwd)" >> $GITHUB_ENV
+        echo "PACKAGES_PATH=$(pwd):$(pwd)/ImGuiPkg" >> $GITHUB_ENV
         echo "EDK_TOOLS_PATH=$(pwd)/BaseTools" >> $GITHUB_ENV
+        echo "WORKSPACE: $WORKSPACE"
+        echo "PACKAGES_PATH: $PACKAGES_PATH"
 
     - name: Copy Dear ImGui to EDK2 workspace
       run: |
-        # Copy Dear ImGui source to EDK2 workspace
-        cp -r imgui $WORKSPACE/ImGui
+        # Debug: Show current directory structure
+        echo "Current directory: $(pwd)"
+        echo "Contents of current directory:"
+        ls -la
+        echo "WORKSPACE: $WORKSPACE"
         
-        # Verify the copy
-        ls -la $WORKSPACE/ImGui/
-        ls -la $WORKSPACE/ImGui/examples/example_uefi/
+        # Create ImGuiPkg and copy Dear ImGui files
+        mkdir -p $WORKSPACE/ImGuiPkg/backends
+        cp imgui/imgui* $WORKSPACE/ImGuiPkg/
+        cp -r imgui/backends/* $WORKSPACE/ImGuiPkg/backends/
+        
+        # Create a minimal DEC file for ImGuiPkg
+        cat > $WORKSPACE/ImGuiPkg/ImGuiPkg.dec <<'EOF'
+[Defines]
+  DEC_SPECIFICATION = 0x00010005
+  PACKAGE_NAME      = ImGuiPkg
+  PACKAGE_GUID      = 12345678-1234-1234-1234-123456789abc
+  PACKAGE_VERSION   = 1.0
+EOF
+        
+        # Debug: Show what was copied
+        echo "Files in workspace root:"
+        ls -la $WORKSPACE/ | grep imgui
+        echo "Files in examples directory:"
+        ls -la $WORKSPACE/examples/
+        echo "Files in example_uefi directory:"
+        ls -la $WORKSPACE/examples/example_uefi/
 
     - name: Configure Build Environment
       run: |
@@ -112,12 +136,22 @@ jobs:
       run: |
         cd $WORKSPACE
         
+        # Set PACKAGES_PATH to include ImGuiPkg first
+        export PACKAGES_PATH=$WORKSPACE/ImGuiPkg:$WORKSPACE
+        
         # Source EDK2 environment
         . edksetup.sh
         
         # Try building with the main DSC first
         echo "Attempting build with main DSC file..."
-        if build -p ImGui/examples/example_uefi/ImGuiUefiExample.dsc \
+        echo "Current directory: $(pwd)"
+        echo "Listing workspace root:"
+        ls -la
+        echo "Listing examples directory:"
+        ls -la examples/example_uefi/
+        echo "Listing DSC file contents:"
+        cat examples/example_uefi/ImGuiUefiExample.dsc
+        if build -p examples/example_uefi/ImGuiUefiExample.dsc \
                  -a ${{ matrix.arch }} \
                  -t ${{ matrix.toolchain }} \
                  -b RELEASE; then
@@ -126,7 +160,7 @@ jobs:
           DSC_USED="main"
         else
           echo "❌ Main DSC build failed, trying minimal DSC..."
-          if build -p ImGui/examples/example_uefi/ImGuiUefiExample_Minimal.dsc \
+          if build -p examples/example_uefi/ImGuiUefiExample_Minimal.dsc \
                    -a ${{ matrix.arch }} \
                    -t ${{ matrix.toolchain }} \
                    -b RELEASE; then
@@ -261,8 +295,8 @@ jobs:
         cp "$BOOTABLE_ZIP" release-package/
         
         # Copy source files
-        cp -r ImGui/examples/example_uefi release-package/source
-        cp -r ImGui/backends/imgui_impl_uefi.* release-package/source/
+        cp -r examples/example_uefi release-package/source
+        cp -r backends/imgui_impl_uefi.* release-package/source/
         
         # Create build info
         cat > release-package/BUILD_INFO.txt << EOF
