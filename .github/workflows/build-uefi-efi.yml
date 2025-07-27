@@ -91,9 +91,9 @@ jobs:
         echo "WORKSPACE: $WORKSPACE"
         
         # Copy Dear ImGui files to EDK2 workspace root
-        cp -r examples $WORKSPACE/
-        cp -r backends $WORKSPACE/
-        cp imgui* $WORKSPACE/
+        cp -r imgui/examples $WORKSPACE/
+        cp -r imgui/backends $WORKSPACE/
+        cp imgui/imgui* $WORKSPACE/
         
         # Debug: Show what was copied
         echo "Files in workspace root:"
