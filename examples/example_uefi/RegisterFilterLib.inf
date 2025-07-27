@@ -1,0 +1,27 @@
+## @file
+#  Register Filter Library Implementation
+#
+#  This library provides register filtering functionality for UEFI applications
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010006
+  BASE_NAME                      = RegisterFilterLib
+  FILE_GUID                      = 87654321-4321-4321-4321-210987654323
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = RegisterFilterLib
+
+[Sources]
+  RegisterFilterLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+
+[BuildOptions]
+  *_*_*_CC_FLAGS = -DDISABLE_NEW_DEPRECATED_INTERFACES
