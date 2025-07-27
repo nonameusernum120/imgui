@@ -114,9 +114,6 @@ EOF
         echo "Files in example_uefi directory:"
         ls -la $WORKSPACE/examples/example_uefi/
 
-        # Set PACKAGES_PATH to include ImGuiPkg
-        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE/ImGuiPkg
-
     - name: Configure Build Environment
       run: |
         cd $WORKSPACE
@@ -138,6 +135,9 @@ EOF
     - name: Build UEFI Application
       run: |
         cd $WORKSPACE
+        
+        # Set PACKAGES_PATH to include ImGuiPkg first
+        export PACKAGES_PATH=$WORKSPACE/ImGuiPkg:$WORKSPACE
         
         # Source EDK2 environment
         . edksetup.sh

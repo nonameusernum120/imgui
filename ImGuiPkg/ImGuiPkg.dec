@@ -1,5 +1,11 @@
+## @file
+#  ImGuiPkg DEC file
+#
+##
+
 [Defines]
-  DEC_SPECIFICATION = 0x00010005
-  PACKAGE_NAME      = ImGuiPkg
-  PACKAGE_GUID      = 12345678-1234-1234-1234-123456789abc
-  PACKAGE_VERSION   = 1.0
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = ImGuiPkg
+  PACKAGE_UNI_FILE               = ImGuiPkg.uni
+  PACKAGE_GUID                   = 12345678-1234-1234-1234-123456789abc
+  PACKAGE_VERSION                = 1.0
