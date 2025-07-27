@@ -120,6 +120,11 @@ jobs:
         
         # Try building with the main DSC first
         echo "Attempting build with main DSC file..."
+        echo "Current directory: $(pwd)"
+        echo "Listing examples directory:"
+        ls -la examples/example_uefi/
+        echo "Listing DSC file contents:"
+        cat examples/example_uefi/ImGuiUefiExample.dsc
         if build -p examples/example_uefi/ImGuiUefiExample.dsc \
                  -a ${{ matrix.arch }} \
                  -t ${{ matrix.toolchain }} \
