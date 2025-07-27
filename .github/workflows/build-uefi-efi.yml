@@ -71,7 +71,7 @@ jobs:
         # Set up build environment
         cd edk2
         export WORKSPACE=$(pwd)
-        export PACKAGES_PATH=$WORKSPACE
+        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE
         export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
         
         # Build BaseTools
@@ -94,6 +94,11 @@ jobs:
         cp -r imgui/examples $WORKSPACE/
         cp -r imgui/backends $WORKSPACE/
         cp imgui/imgui* $WORKSPACE/
+        
+        # Create a proper package structure for imgui files
+        mkdir -p $WORKSPACE/ImGuiPkg
+        cp imgui/imgui* $WORKSPACE/ImGuiPkg/
+        cp -r imgui/backends $WORKSPACE/ImGuiPkg/
         
         # Debug: Show what was copied
         echo "Files in workspace root:"
