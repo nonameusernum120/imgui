@@ -88,9 +88,14 @@ jobs:
         cp -r imgui/examples $WORKSPACE/
         # Copy backends directory (needed for UEFI implementation)
         cp -r imgui/backends $WORKSPACE/
-        # Copy imgui core files
+        # Copy imgui core files to workspace root
         cp imgui/imgui* $WORKSPACE/
-        # Verify the copy
+        # Debug: Show what was copied
+        echo "Files in workspace root:"
+        ls -la $WORKSPACE/
+        echo "Files in examples directory:"
+        ls -la $WORKSPACE/examples/
+        echo "Files in example_uefi directory:"
         ls -la $WORKSPACE/examples/example_uefi/
 
     - name: Configure Build Environment
