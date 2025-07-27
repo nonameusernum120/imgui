@@ -66,12 +66,12 @@ jobs:
         path: edk2
         submodules: recursive
 
-    - name: Setup EDK2
+    - name: Setup EDK2 Environment
       run: |
         # Set up build environment
         cd edk2
         export WORKSPACE=$(pwd)
-        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE/ImGuiPkg
+        export PACKAGES_PATH=$WORKSPACE/ImGuiPkg:$WORKSPACE
         export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
         
         # Build BaseTools
@@ -81,6 +81,8 @@ jobs:
         echo "WORKSPACE=$(pwd)" >> $GITHUB_ENV
         echo "PACKAGES_PATH=$(pwd):$(pwd)/ImGuiPkg" >> $GITHUB_ENV
         echo "EDK_TOOLS_PATH=$(pwd)/BaseTools" >> $GITHUB_ENV
+        echo "WORKSPACE: $WORKSPACE"
+        echo "PACKAGES_PATH: $PACKAGES_PATH"
 
     - name: Copy Dear ImGui to EDK2 workspace
       run: |
