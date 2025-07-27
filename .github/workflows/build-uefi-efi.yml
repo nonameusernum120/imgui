@@ -119,7 +119,7 @@ jobs:
         
         # Try building with the main DSC first
         echo "Attempting build with main DSC file..."
-        if build -p ImGui/examples/example_uefi/ImGuiUefiExample.dsc \
+        if build -p examples/example_uefi/ImGuiUefiExample.dsc \
                  -a ${{ matrix.arch }} \
                  -t ${{ matrix.toolchain }} \
                  -b RELEASE; then
@@ -128,7 +128,7 @@ jobs:
           DSC_USED="main"
         else
           echo "❌ Main DSC build failed, trying minimal DSC..."
-          if build -p ImGui/examples/example_uefi/ImGuiUefiExample_Minimal.dsc \
+          if build -p examples/example_uefi/ImGuiUefiExample_Minimal.dsc \
                    -a ${{ matrix.arch }} \
                    -t ${{ matrix.toolchain }} \
                    -b RELEASE; then
