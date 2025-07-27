@@ -263,8 +263,8 @@ jobs:
         cp "$BOOTABLE_ZIP" release-package/
         
         # Copy source files
-        cp -r ImGui/examples/example_uefi release-package/source
-        cp -r ImGui/backends/imgui_impl_uefi.* release-package/source/
+        cp -r examples/example_uefi release-package/source
+        cp -r backends/imgui_impl_uefi.* release-package/source/
         
         # Create build info
         cat > release-package/BUILD_INFO.txt << EOF
