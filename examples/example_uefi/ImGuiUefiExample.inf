@@ -17,12 +17,12 @@
 [Sources]
   main.c
   imgui_c_wrapper.cpp
-  ../../ImGuiPkg/imgui.cpp
-  ../../ImGuiPkg/imgui_demo.cpp
-  ../../ImGuiPkg/imgui_draw.cpp
-  ../../ImGuiPkg/imgui_tables.cpp
-  ../../ImGuiPkg/imgui_widgets.cpp
-  ../../ImGuiPkg/backends/imgui_impl_uefi.cpp
+  ImGuiPkg/imgui.cpp
+  ImGuiPkg/imgui_demo.cpp
+  ImGuiPkg/imgui_draw.cpp
+  ImGuiPkg/imgui_tables.cpp
+  ImGuiPkg/imgui_widgets.cpp
+  ImGuiPkg/backends/imgui_impl_uefi.cpp
 
 [Packages]
   MdePkg/MdePkg.dec

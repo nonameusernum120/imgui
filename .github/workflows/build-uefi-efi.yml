@@ -92,44 +92,25 @@ jobs:
         ls -la
         echo "WORKSPACE: $WORKSPACE"
         
-        # Copy Dear ImGui files to EDK2 workspace root
-        cp -r imgui/examples $WORKSPACE/
-        cp -r imgui/backends $WORKSPACE/
-        cp imgui/imgui* $WORKSPACE/
-        
-        # Create a proper package structure for imgui files
-        mkdir -p $WORKSPACE/ImGuiPkg
+        # Create ImGuiPkg and copy Dear ImGui files
+        mkdir -p $WORKSPACE/ImGuiPkg/backends
         cp imgui/imgui* $WORKSPACE/ImGuiPkg/
-        cp -r imgui/backends $WORKSPACE/ImGuiPkg/
+        cp -r imgui/backends/* $WORKSPACE/ImGuiPkg/backends/
         
-        # Copy the DEC file to make ImGuiPkg a proper EDK2 package
-        cp examples/example_uefi/ImGuiPkg.dec $WORKSPACE/ImGuiPkg/
-        
-        # Create ImGuiPkg DEC and UNI files
+        # Create a minimal DEC file for ImGuiPkg
         cat > $WORKSPACE/ImGuiPkg/ImGuiPkg.dec <<'EOF'
-## @file
-#  ImGui Package Declaration
-#
-##
-
 [Defines]
-  DEC_SPECIFICATION              = 0x00010005
-  PACKAGE_NAME                   = ImGuiPkg
-  PACKAGE_UNI_FILE               = ImGuiPkg.uni
-  PACKAGE_GUID                   = 12345678-1234-1234-1234-123456789abc
-  PACKAGE_VERSION                = 1.0
+  DEC_SPECIFICATION = 0x00010005
+  PACKAGE_NAME      = ImGuiPkg
+  PACKAGE_GUID      = 12345678-1234-1234-1234-123456789abc
+  PACKAGE_VERSION   = 1.0
 EOF
-        touch $WORKSPACE/ImGuiPkg/ImGuiPkg.uni
         
         # Debug: Show what was copied
-        echo "Files in workspace root:"
-        ls -la $WORKSPACE/ | grep imgui
-        echo "Files in examples directory:"
-        ls -la $WORKSPACE/examples/
-        echo "Files in example_uefi directory:"
-        ls -la $WORKSPACE/examples/example_uefi/
         echo "Files in ImGuiPkg directory:"
         ls -la $WORKSPACE/ImGuiPkg/
+        echo "Files in ImGuiPkg/backends directory:"
+        ls -la $WORKSPACE/ImGuiPkg/backends/
         echo "PACKAGES_PATH: $PACKAGES_PATH"
 
     - name: Configure Build Environment
