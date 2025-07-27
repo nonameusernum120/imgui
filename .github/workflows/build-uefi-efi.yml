@@ -86,9 +86,10 @@ jobs:
       run: |
         # Copy Dear ImGui 'examples' directory to EDK2 workspace root
         cp -r imgui/examples $WORKSPACE/
-        # Optionally copy other required directories/files as needed
-        # cp -r imgui/backends $WORKSPACE/
-        # cp imgui/imgui* $WORKSPACE/
+        # Copy backends directory (needed for UEFI implementation)
+        cp -r imgui/backends $WORKSPACE/
+        # Copy imgui core files
+        cp imgui/imgui* $WORKSPACE/
         # Verify the copy
         ls -la $WORKSPACE/examples/example_uefi/
 
