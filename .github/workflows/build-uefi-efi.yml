@@ -131,6 +131,8 @@ jobs:
         # Try building with the main DSC first
         echo "Attempting build with main DSC file..."
         echo "Current directory: $(pwd)"
+        echo "Listing workspace root:"
+        ls -la
         echo "Listing examples directory:"
         ls -la examples/example_uefi/
         echo "Listing DSC file contents:"
