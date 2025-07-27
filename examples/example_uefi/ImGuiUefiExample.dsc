@@ -40,9 +40,6 @@
   # PCD
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   
-  # Additional required libraries (may vary by EDK2 version)
-  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
-  
   # Additional libraries that might be required
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
