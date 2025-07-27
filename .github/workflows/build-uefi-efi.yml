@@ -107,11 +107,15 @@ jobs:
 EOF
         
         # Debug: Show what was copied
-        echo "Files in ImGuiPkg directory:"
-        ls -la $WORKSPACE/ImGuiPkg/
-        echo "Files in ImGuiPkg/backends directory:"
-        ls -la $WORKSPACE/ImGuiPkg/backends/
-        echo "PACKAGES_PATH: $PACKAGES_PATH"
+        echo "Files in workspace root:"
+        ls -la $WORKSPACE/ | grep imgui
+        echo "Files in examples directory:"
+        ls -la $WORKSPACE/examples/
+        echo "Files in example_uefi directory:"
+        ls -la $WORKSPACE/examples/example_uefi/
+
+        # Set PACKAGES_PATH to include ImGuiPkg
+        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE/ImGuiPkg
 
     - name: Configure Build Environment
       run: |
