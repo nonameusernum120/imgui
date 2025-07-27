@@ -71,7 +71,7 @@ jobs:
         # Set up build environment
         cd edk2
         export WORKSPACE=$(pwd)
-        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE
+        export PACKAGES_PATH=$WORKSPACE:$WORKSPACE/ImGuiPkg
         export EDK_TOOLS_PATH=$WORKSPACE/BaseTools
         
         # Build BaseTools
@@ -79,7 +79,7 @@ jobs:
         
         # Set environment variables for subsequent steps
         echo "WORKSPACE=$(pwd)" >> $GITHUB_ENV
-        echo "PACKAGES_PATH=$(pwd)" >> $GITHUB_ENV
+        echo "PACKAGES_PATH=$(pwd):$(pwd)/ImGuiPkg" >> $GITHUB_ENV
         echo "EDK_TOOLS_PATH=$(pwd)/BaseTools" >> $GITHUB_ENV
 
     - name: Copy Dear ImGui to EDK2 workspace
@@ -100,6 +100,9 @@ jobs:
         cp imgui/imgui* $WORKSPACE/ImGuiPkg/
         cp -r imgui/backends $WORKSPACE/ImGuiPkg/
         
+        # Copy the DEC file to make ImGuiPkg a proper EDK2 package
+        cp examples/example_uefi/ImGuiPkg.dec $WORKSPACE/ImGuiPkg/
+        
         # Debug: Show what was copied
         echo "Files in workspace root:"
         ls -la $WORKSPACE/ | grep imgui
@@ -107,6 +110,9 @@ jobs:
         ls -la $WORKSPACE/examples/
         echo "Files in example_uefi directory:"
         ls -la $WORKSPACE/examples/example_uefi/
+        echo "Files in ImGuiPkg directory:"
+        ls -la $WORKSPACE/ImGuiPkg/
+        echo "PACKAGES_PATH: $PACKAGES_PATH"
 
     - name: Configure Build Environment
       run: |

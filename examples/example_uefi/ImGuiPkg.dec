@@ -1,0 +1,27 @@
+## @file
+#  Dear ImGui Package Declaration
+#
+#  This package provides Dear ImGui library for UEFI applications
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = ImGuiPkg
+  PACKAGE_GUID                   = 87654321-4321-4321-4321-210987654324
+  PACKAGE_VERSION                = 1.0
+  PACKAGE_UNI_FILE               = ImGuiPkg.uni
+
+[Includes]
+  .
+
+[Guids]
+  ## Dear ImGui Package GUID
+  gImGuiPkgTokenSpaceGuid = { 0x87654321, 0x4321, 0x4321, { 0x43, 0x21, 0x21, 0x09, 0x87, 0x65, 0x43, 0x24 } }
+
+[PcdsFixedAtBuild]
+  ## Dear ImGui version string
+  gImGuiPkgTokenSpaceGuid.PcdImGuiVersion|"1.89.9"|VOID*|0x00000001
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  ImGuiPkgExtra.uni

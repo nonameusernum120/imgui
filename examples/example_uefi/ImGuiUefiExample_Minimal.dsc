@@ -54,6 +54,11 @@
   UefiHiiServicesLib|MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf
   HiiLib|MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf
 
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  ImGuiPkg/ImGuiPkg.dec
+
 [Components]
   examples/example_uefi/ImGuiUefiExample.inf
 
