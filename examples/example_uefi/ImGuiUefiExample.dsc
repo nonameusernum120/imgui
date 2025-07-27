@@ -16,6 +16,7 @@
 [LibraryClasses]
   # Entry point
   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+  StackCheckLib|MdePkg/Library/StackCheckLib/StackCheckLib.inf
   
   # Basic
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
