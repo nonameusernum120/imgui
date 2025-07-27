@@ -47,6 +47,10 @@
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
+  
+  # Stack and Register Filter libraries (NULL implementations)
+  StackCheckLib|MdePkg/Library/BaseStackCheckLibNull/BaseStackCheckLibNull.inf
+  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications

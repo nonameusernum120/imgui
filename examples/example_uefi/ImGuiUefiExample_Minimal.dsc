@@ -44,6 +44,10 @@
   
   # IO Libraries
   IoLib|MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf
+  
+  # Stack and Register Filter libraries (NULL implementations)
+  StackCheckLib|MdePkg/Library/BaseStackCheckLibNull/BaseStackCheckLibNull.inf
+  RegisterFilterLib|MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf
 
 [LibraryClasses.common.UEFI_APPLICATION]
   # Additional libraries for UEFI applications
