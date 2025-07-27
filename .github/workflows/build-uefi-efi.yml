@@ -16,7 +16,7 @@ on:
       edk2_version:
         description: 'EDK2 version/tag to use'
         required: false
-        default: 'edk2-stable202408'
+        default: 'edk2-stable202505'
       architecture:
         description: 'Target architecture'
         required: false
@@ -62,7 +62,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: tianocore/edk2
-        ref: ${{ github.event.inputs.edk2_version || 'edk2-stable202408' }}
+        ref: ${{ github.event.inputs.edk2_version || 'edk2-stable202505' }}
         path: edk2
         submodules: recursive
 
