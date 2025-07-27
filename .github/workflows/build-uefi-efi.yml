@@ -105,6 +105,22 @@ jobs:
         # Copy the DEC file to make ImGuiPkg a proper EDK2 package
         cp examples/example_uefi/ImGuiPkg.dec $WORKSPACE/ImGuiPkg/
         
+        # Create ImGuiPkg DEC and UNI files
+        cat > $WORKSPACE/ImGuiPkg/ImGuiPkg.dec <<'EOF'
+## @file
+#  ImGui Package Declaration
+#
+##
+
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = ImGuiPkg
+  PACKAGE_UNI_FILE               = ImGuiPkg.uni
+  PACKAGE_GUID                   = 12345678-1234-1234-1234-123456789abc
+  PACKAGE_VERSION                = 1.0
+EOF
+        touch $WORKSPACE/ImGuiPkg/ImGuiPkg.uni
+        
         # Debug: Show what was copied
         echo "Files in workspace root:"
         ls -la $WORKSPACE/ | grep imgui
